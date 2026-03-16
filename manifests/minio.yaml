@@ -33,10 +33,12 @@ spec:
       labels:
         app: minio
     spec:
-      # Pin MinIO to a node that has /mnt/external mounted.
-      # Label that node: kubectl label node <node-name> storage=external
+      # Pin MinIO to the control-plane node which has /mnt/external as a local disk.
+      # Workers may also have storage=external (via NFS mount) but must not run MinIO
+      # since MinIO's hostPath requires the actual local disk, not an NFS mount.
       nodeSelector:
         storage: external
+        node-role.kubernetes.io/control-plane: "true"
       containers:
         - name: minio
           # Consider pinning to a specific release tag instead of latest.
